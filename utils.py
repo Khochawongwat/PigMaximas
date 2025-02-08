@@ -48,11 +48,12 @@ def _calculate_orientation_and_rotate(img, direction, angle_degrees):
     rotation_matrix = cv.getRotationMatrix2D(image_center, angle_degrees, 1.0)
 
     rotated_img = cv.warpAffine(img, rotation_matrix, img.shape[1::-1], flags=cv.INTER_LINEAR)
-    return rotated_img
+    return cv.flip(rotated_img, 1)
 
 def _slice_half(img):
     contours, _ = cv.findContours(img, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE)
-
+    if not contours:
+        raise ValueError("No contours found.")
     largest_contour = max(contours, key=cv.contourArea)
     
     cX, cY = _calculate_centroid(largest_contour)
@@ -207,7 +208,7 @@ def section(img, img_width = 512, sections = 4):
     img = np.where(img > 1, 255, 0).astype(np.uint8)
 
     #Resize to match pigs anatomy. try getting the ratios of the pig it should be around 0.36-40.
-    targets = (int(img_width * 0.36), img_width)
+    targets = (int(img_width * 0.4), img_width)
 
     #Pad for spaces around the pig
     img = pad(img, targets)
@@ -240,7 +241,6 @@ def section(img, img_width = 512, sections = 4):
     sections = []
     
     if len(coords) > 0:
-        
         # Section 1: Legs
         start_x1, end_x1 = 0, coords[0][1]
         section1 = _create_section(t_img, start_x1, end_x1)
@@ -259,8 +259,9 @@ def section(img, img_width = 512, sections = 4):
             sections.append(section3)
 
         # Section 4: Head
-        start_x4, end_x4 = coords[2][1], t_img.shape[1]
-        section4 = _create_section(t_img, start_x4, end_x4)
-        sections.append(section4)
+        if len(coords) > 3:
+            start_x4, end_x4 = coords[2][1], t_img.shape[1]
+            section4 = _create_section(t_img, start_x4, end_x4)
+            sections.append(section4)
 
     return np.array(sections)

@@ -1,6 +1,7 @@
 **Folder Structure Requirement**
 To use this system, ensure that your file structure follows this format:
 
+This is inside the 'cnn' folder.
 batches/
     ├── batch_A/
     │   ├── pig_A/
@@ -16,6 +17,7 @@ batches/
         ├── pig_B/
             ├── frame_2_depth_crop.png
             ├── frame_2_rgb_crop.png
+main.ipynb
 
 **Folder Structure**:
 
